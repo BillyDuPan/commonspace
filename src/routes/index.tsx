@@ -47,6 +47,26 @@ export const router = createBrowserRouter([
     )
   },
   {
+    path: '/superadmin/venue/new',
+    element: (
+      <Layout>
+        <ProtectedRoute requiredRole="superadmin">
+          <EditVenue />
+        </ProtectedRoute>
+      </Layout>
+    )
+  },
+  {
+    path: '/superadmin/venue/:id/edit',
+    element: (
+      <Layout>
+        <ProtectedRoute requiredRole="superadmin">
+          <EditVenue />
+        </ProtectedRoute>
+      </Layout>
+    )
+  },
+  {
     path: '/venue-dashboard',
     element: (
       <Layout>

@@ -1,7 +1,6 @@
 import { emailService } from './emailService';
 import { bookingService } from './api/bookings';
 import { userService } from './api/users';
-import { venueService } from './api/venues';
 
 class EmailScheduler {
   private intervalId: NodeJS.Timeout | null = null;

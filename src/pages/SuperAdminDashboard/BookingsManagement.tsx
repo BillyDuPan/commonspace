@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, query, getDocs, doc, updateDoc, where, orderBy } from 'firebase/firestore';
 import { db } from '../../services/firebase';
-import { format } from 'date-fns';
 
 interface Booking {
   id: string;

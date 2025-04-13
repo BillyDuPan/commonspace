@@ -10,8 +10,6 @@ interface EmailTemplate {
 }
 
 class EmailService {
-  private readonly FROM_EMAIL = 'notifications@commonspace.com';
-  
   /**
    * Sends an email using the configured email provider
    */

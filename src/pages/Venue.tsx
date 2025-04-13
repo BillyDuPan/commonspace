@@ -28,7 +28,6 @@ export default function Venue() {
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [bookingError, setBookingError] = useState<string>('');
   const [isBooking, setIsBooking] = useState(false);
-  const [existingBookings, setExistingBookings] = useState<ExistingBooking[]>([]);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
 
   // Get today's date in YYYY-MM-DD format
@@ -83,7 +82,6 @@ export default function Venue() {
           bookings: bookings
         });
 
-        setExistingBookings(bookings);
         generateTimeSlots(selectedDate, bookings);
       } catch (error: any) {
         console.error('Error fetching bookings:', error);

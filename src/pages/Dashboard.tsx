@@ -161,7 +161,7 @@ export default function Dashboard() {
                 <div>
                   <div className="font-medium text-text-primary">{venue?.name}</div>
                   <div className="text-sm text-text-secondary">
-                    {new Date(booking.date).toLocaleDateString()} • {booking.timeSlot.start} - {booking.timeSlot.end}
+                    {new Date(booking.date).toLocaleDateString()} • {booking.time}
                   </div>
                 </div>
                 <span className={`badge ${

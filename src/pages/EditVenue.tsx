@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, setDoc, updateDoc, collection } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../services/firebase';
-import { Venue, OpeningHours, Package } from '../types';
+import { Venue, Package } from '../types';
 import { useAuth } from '../context/AuthContext';
 
 const DEFAULT_OPENING_HOURS = {
@@ -47,6 +47,9 @@ export default function EditVenue() {
   });
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Determine if the current user is a superadmin
+  const isSuperAdmin = user?.role === 'superadmin';
 
   useEffect(() => {
     async function fetchVenue() {
@@ -163,7 +166,12 @@ export default function EditVenue() {
         await setDoc(newVenueRef, venueData);
       }
 
-      navigate('/venue/spaces');
+      // Navigate based on user role
+      if (isSuperAdmin) {
+        navigate('/superadmin');
+      } else {
+        navigate('/venue/spaces');
+      }
     } catch (error) {
       console.error('Error saving venue:', error);
       setErrors({ submit: 'Failed to save venue. Please try again.' });
@@ -188,7 +196,7 @@ export default function EditVenue() {
             {id ? 'Edit Venue' : 'Add New Venue'}
           </h1>
           <button
-            onClick={() => navigate('/superadmin')}
+            onClick={() => isSuperAdmin ? navigate('/superadmin') : navigate('/venue/spaces')}
             className="text-blue-600 hover:text-blue-700"
           >
             ← Back to Dashboard
@@ -425,7 +433,7 @@ export default function EditVenue() {
           <div className="flex justify-end space-x-4">
             <button
               type="button"
-              onClick={() => navigate('/superadmin')}
+              onClick={() => isSuperAdmin ? navigate('/superadmin') : navigate('/venue/spaces')}
               className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
             >
               Cancel

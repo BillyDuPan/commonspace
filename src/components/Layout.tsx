@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useRef, useState, useEffect } from 'react';
 
@@ -8,7 +8,6 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const { user, loading, isImpersonating, stopImpersonating, signOut } = useAuth();
-  const location = useLocation();
   const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);

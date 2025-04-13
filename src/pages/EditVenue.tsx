@@ -4,6 +4,7 @@ import { doc, getDoc, setDoc, updateDoc, collection } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../services/firebase';
 import { Venue, OpeningHours, Package } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 const DEFAULT_OPENING_HOURS = {
   monday: { open: '09:00', close: '17:00' },
@@ -17,17 +18,20 @@ const DEFAULT_OPENING_HOURS = {
 
 type DayOfWeek = keyof typeof DEFAULT_OPENING_HOURS;
 
-const DEFAULT_PACKAGE = {
-  id: '',
+const generateId = () => Math.random().toString(36).substring(2, 15);
+
+const createDefaultPackage = () => ({
+  id: generateId(),
   name: '',
   price: 0,
   duration: 1,
   description: '',
-};
+});
 
 export default function EditVenue() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [venue, setVenue] = useState<Partial<Venue>>({
@@ -37,7 +41,7 @@ export default function EditVenue() {
     type: 'cafe',
     photos: [],
     openingHours: DEFAULT_OPENING_HOURS,
-    packages: [{ ...DEFAULT_PACKAGE }],
+    packages: [createDefaultPackage()],
     status: 'active',
     priceRange: '$$',
   });
@@ -88,18 +92,17 @@ export default function EditVenue() {
     setVenue(prev => ({
       ...prev,
       packages: prev.packages?.map((pkg, i) =>
-        i === index ? { ...pkg, [field]: value } : pkg
+        i === index ? { ...pkg, [field]: value, id: pkg.id || generateId() } : pkg
       ) || [],
     }));
   };
 
- const addPackage = () => {
-  const generateId = () => Math.random().toString(36).substring(2, 15);
-  setVenue(prev => ({
-   ...prev,
-   packages: [...(prev.packages || []), { ...DEFAULT_PACKAGE, id: generateId() }],
-  }));
- };
+  const addPackage = () => {
+    setVenue(prev => ({
+      ...prev,
+      packages: [...(prev.packages || []), createDefaultPackage()],
+    }));
+  };
 
   const removePackage = (index: number) => {
     setVenue(prev => ({
@@ -130,6 +133,10 @@ export default function EditVenue() {
     e.preventDefault();
     
     if (!validateForm()) return;
+    if (!user) {
+      setErrors({ submit: 'You must be logged in to create or edit a venue.' });
+      return;
+    }
     
     setSaving(true);
     try {
@@ -144,6 +151,7 @@ export default function EditVenue() {
 
       const venueData = {
         ...venue,
+        ownerId: user.id,
         photos: [...(venue.photos || []), ...uploadedUrls],
         updatedAt: new Date().toISOString(),
       };
@@ -155,7 +163,7 @@ export default function EditVenue() {
         await setDoc(newVenueRef, venueData);
       }
 
-      navigate('/superadmin');
+      navigate('/venue/spaces');
     } catch (error) {
       console.error('Error saving venue:', error);
       setErrors({ submit: 'Failed to save venue. Please try again.' });

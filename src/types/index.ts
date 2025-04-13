@@ -1,33 +1,12 @@
-export type UserRole = 'superadmin' | 'admin' | 'user';
-
 export interface User {
-  uid: string;
+  id: string;
+  uid: string; // Required for Firebase auth
   email: string;
   name: string;
-  role: UserRole;
-  favorites?: string[];
+  role: 'user' | 'venue' | 'admin' | 'superadmin';
   photoURL?: string;
-}
-
-export interface Venue {
-  id: string;
-  name: string;
-  location: string;
-  description: string;
-  adminId: string;
-  status: 'active' | 'inactive';
-  type: string;
-  priceRange?: string;
-  photos: string[];
-  packages: Package[];
-  openingHours: {
-    [key: string]: {
-      open: string;
-      close: string;
-    };
-  };
-  capacity: number; // Maximum number of concurrent bookings
-  rating?: number; // Average rating of the venue
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface OpeningHours {
@@ -40,20 +19,54 @@ export interface OpeningHours {
 export interface Package {
   id: string;
   name: string;
-  price: number;
-  duration: number; // in hours
   description: string;
+  price: number;
+  duration: number;
+}
+
+export interface Venue {
+  id: string;
+  name: string;
+  description: string;
+  address: string;
+  creatorId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  location: string;
+  type: 'cafe' | 'cowork';
+  status: 'active' | 'inactive';
+  photos?: string[];
+  rating?: number;
+  priceRange: '$' | '$$' | '$$$';
+  capacity: number;
+  openingHours: OpeningHours;
+  packages: Package[];
 }
 
 export interface Booking {
   id: string;
-  venueId: string;
   userId: string;
-  date: string;
-  timeSlot: {
-    start: string;
-    end: string;
-  };
+  userName: string;
+  userEmail: string;
+  venueId: string;
+  venueName: string;
   packageId: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
+  packageName: string;
+  packagePrice: number;
+  date: string;
+  time: string;
+  duration: number;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'in_progress' | 'no_show';
+  statusUpdatedAt?: {
+    seconds: number;
+    nanoseconds: number;
+  };
+  createdAt: {
+    seconds: number;
+    nanoseconds: number;
+  };
+  updatedAt: {
+    seconds: number;
+    nanoseconds: number;
+  };
 } 

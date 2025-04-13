@@ -6,6 +6,7 @@ import {
 } from "firebase/auth";
 import { auth, db } from "../services/firebase";
 import { doc, setDoc } from "firebase/firestore";
+import { emailService } from "../services/emailService";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -31,11 +32,30 @@ export default function Login() {
           password
         );
         const user = userCredential.user;
-        await setDoc(doc(db, "users", user.uid), {
+        
+        // Create the user record in Firestore
+        const userData = {
           email: email,
           name: name,
           role: "user",
-        });
+          createdAt: new Date(),
+        };
+        
+        await setDoc(doc(db, "users", user.uid), userData);
+        
+        // Send welcome email
+        try {
+          await emailService.sendWelcomeEmail({
+            id: user.uid,
+            uid: user.uid,
+            email: email,
+            name: name,
+            role: "user",
+          });
+        } catch (emailError) {
+          console.error("Failed to send welcome email:", emailError);
+          // Don't fail the signup process if email fails
+        }
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }

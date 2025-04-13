@@ -1,5 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { createBrowserRouter } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Home from '../pages/Home';
 import Login from '../pages/Login';
@@ -9,42 +8,19 @@ import Booking from '../pages/Booking';
 import Profile from '../pages/Profile';
 import SuperadminDashboard from '../pages/SuperadminDashboard';
 import EditVenue from '../pages/EditVenue';
-
-// Protected route wrapper
-function ProtectedRoute({ children, requireAdmin = false, requireSuperadmin = false }: { 
-  children: React.ReactNode; 
-  requireAdmin?: boolean;
-  requireSuperadmin?: boolean;
-}) {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
-
-  if (requireSuperadmin && user.role !== 'superadmin') {
-    return <Navigate to="/" />;
-  }
-
-  if (requireAdmin && user.role !== 'admin' && user.role !== 'superadmin') {
-    return <Navigate to="/" />;
-  }
-
-  return <>{children}</>;
-}
+import { ProtectedRoute } from '../components/ProtectedRoute';
+import MyVenues from '../pages/MyVenues';
+import VenueDashboard from '../pages/VenueDashboard';
+import UserBookings from '../pages/UserBookings';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Layout><Home /></Layout>,
+    element: <Layout><Home /></Layout>
   },
   {
     path: '/login',
-    element: <Layout><Login /></Layout>,
+    element: <Layout><Login /></Layout>
   },
   {
     path: '/signup',
@@ -53,42 +29,82 @@ export const router = createBrowserRouter([
   {
     path: '/dashboard',
     element: (
-      <ProtectedRoute requireAdmin>
-        <Layout><Dashboard /></Layout>
-      </ProtectedRoute>
-    ),
+      <Layout>
+        <ProtectedRoute requiredRole="admin">
+          <Dashboard />
+        </ProtectedRoute>
+      </Layout>
+    )
   },
   {
     path: '/superadmin',
     element: (
-      <ProtectedRoute requireSuperadmin>
-        <Layout><SuperadminDashboard /></Layout>
-      </ProtectedRoute>
-    ),
+      <Layout>
+        <ProtectedRoute requiredRole="superadmin">
+          <SuperadminDashboard />
+        </ProtectedRoute>
+      </Layout>
+    )
   },
   {
-    path: '/superadmin/venue/new',
+    path: '/venue-dashboard',
     element: (
-      <ProtectedRoute requireSuperadmin>
-        <Layout><EditVenue /></Layout>
-      </ProtectedRoute>
-    ),
+      <Layout>
+        <ProtectedRoute requiredRole="venue">
+          <VenueDashboard />
+        </ProtectedRoute>
+      </Layout>
+    )
   },
   {
-    path: '/superadmin/venue/:id/edit',
+    path: '/my-venues',
     element: (
-      <ProtectedRoute requireSuperadmin>
-        <Layout><EditVenue /></Layout>
-      </ProtectedRoute>
-    ),
+      <Layout>
+        <ProtectedRoute requiredRole="venue">
+          <MyVenues />
+        </ProtectedRoute>
+      </Layout>
+    )
+  },
+  {
+    path: '/venue/spaces',
+    element: (
+      <Layout>
+        <ProtectedRoute requiredRole="venue">
+          <MyVenues />
+        </ProtectedRoute>
+      </Layout>
+    )
+  },
+  {
+    path: '/venue/new',
+    element: (
+      <Layout>
+        <ProtectedRoute requiredRole="venue">
+          <EditVenue />
+        </ProtectedRoute>
+      </Layout>
+    )
+  },
+  {
+    path: '/venue/:id/edit',
+    element: (
+      <Layout>
+        <ProtectedRoute requiredRole="venue">
+          <EditVenue />
+        </ProtectedRoute>
+      </Layout>
+    )
   },
   {
     path: '/profile',
     element: (
-      <ProtectedRoute>
-        <Layout><Profile /></Layout>
-      </ProtectedRoute>
-    ),
+      <Layout>
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      </Layout>
+    )
   },
   {
     path: '/venue/:id',
@@ -101,5 +117,15 @@ export const router = createBrowserRouter([
         <Layout><Booking /></Layout>
       </ProtectedRoute>
     ),
+  },
+  {
+    path: '/bookings',
+    element: (
+      <Layout>
+        <ProtectedRoute>
+          <UserBookings />
+        </ProtectedRoute>
+      </Layout>
+    )
   },
 ]); 

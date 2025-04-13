@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, addDoc, collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, query, where, getDocs, Timestamp, limit } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { useAuth } from '../context/AuthContext';
 import { Venue as VenueType } from '../types';
@@ -37,38 +37,72 @@ export default function Venue() {
   // Fetch existing bookings for the selected date
   useEffect(() => {
     async function fetchBookings() {
-      if (!selectedDate || !venue) return;
+      console.log('Fetching bookings for:', {
+        selectedDate,
+        venueId: venue?.id,
+        selectedPackage,
+        user: user?.role
+      });
+
+      if (!selectedDate || !venue) {
+        console.log('Missing required data for fetching bookings');
+        setTimeSlots([]);
+        return;
+      }
 
       try {
+        // Simplified query that matches security rules
         const bookingsQuery = query(
           collection(db, 'bookings'),
           where('venueId', '==', venue.id),
           where('date', '==', selectedDate),
-          where('status', 'in', ['pending', 'confirmed'])
+          where('status', 'in', ['pending', 'confirmed']),
+          limit(100)
         );
 
+        console.log('Executing query with params:', {
+          venueId: venue.id,
+          date: selectedDate,
+          status: ['pending', 'confirmed'],
+          userRole: user?.role,
+          isAuthenticated: !!user
+        });
+
         const bookingsSnapshot = await getDocs(bookingsQuery);
-        const bookings: ExistingBooking[] = [];
+        const bookings: ExistingBooking[] = bookingsSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            time: data.time,
+            date: data.date,
+            duration: data.duration
+          };
+        });
         
-        bookingsSnapshot.forEach((doc) => {
-          const booking = doc.data();
-          bookings.push({
-            time: booking.time,
-            date: booking.date,
-            duration: booking.duration
-          });
+        console.log('Successfully fetched bookings:', {
+          count: bookings.length,
+          bookings: bookings
         });
 
         setExistingBookings(bookings);
-        // Regenerate time slots when bookings are fetched
         generateTimeSlots(selectedDate, bookings);
       } catch (error: any) {
         console.error('Error fetching bookings:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
+        if (error.code === 'permission-denied') {
+          console.error('Permission denied. User auth state:', {
+            isAuthenticated: !!user,
+            userRole: user?.role,
+            userId: user?.uid
+          });
+        }
+        setTimeSlots([]);
       }
     }
-
-    if (selectedDate) fetchBookings();
-  }, [selectedDate, venue]);
+    
+    if (selectedDate && selectedPackage) {
+      fetchBookings();
+    }
+  }, [selectedDate, selectedPackage, venue, user]);
 
   useEffect(() => {
     async function fetchVenue() {
@@ -113,37 +147,34 @@ export default function Venue() {
   };
 
   const isTimeSlotAvailable = (
-    time: string, 
-    duration: number, 
-    existingBookings: ExistingBooking[],
-    venueCapacity: number
+    time: string,
+    duration: number,
+    bookings: ExistingBooking[],
+    capacity: number
   ): { available: boolean; remainingCapacity: number } => {
-    const timeInMinutes = (time: string): number => {
-      const [hours, minutes] = time.split(':').map(Number);
-      return hours * 60 + minutes;
-    };
+    const [hour, minute] = time.split(':').map(Number);
+    const slotStart = hour * 60 + minute;
+    const slotEnd = slotStart + duration * 60;
 
-    const startTime = timeInMinutes(time);
-    const endTime = startTime + (duration * 60);
+    // Check each minute of the proposed slot against existing bookings
     let maxOverlap = 0;
-
-    // Check each existing booking for overlap
-    for (let minute = startTime; minute < endTime; minute += 30) {
-      let currentOverlap = 0;
+    for (let currentMinute = slotStart; currentMinute < slotEnd; currentMinute++) {
+      let overlappingBookings = 0;
       
-      existingBookings.forEach(booking => {
-        const bookingStart = timeInMinutes(booking.time);
-        const bookingEnd = bookingStart + (booking.duration * 60);
-        
-        if (minute >= bookingStart && minute < bookingEnd) {
-          currentOverlap++;
+      bookings.forEach(booking => {
+        const [bookingHour, bookingMinute] = booking.time.split(':').map(Number);
+        const bookingStart = bookingHour * 60 + bookingMinute;
+        const bookingEnd = bookingStart + booking.duration * 60;
+
+        if (currentMinute >= bookingStart && currentMinute < bookingEnd) {
+          overlappingBookings++;
         }
       });
 
-      maxOverlap = Math.max(maxOverlap, currentOverlap);
+      maxOverlap = Math.max(maxOverlap, overlappingBookings);
     }
 
-    const remainingCapacity = venueCapacity - maxOverlap;
+    const remainingCapacity = capacity - maxOverlap;
     return {
       available: remainingCapacity > 0,
       remainingCapacity
@@ -151,7 +182,20 @@ export default function Venue() {
   };
 
   const generateTimeSlots = (date: string, bookings: ExistingBooking[]) => {
-    if (!venue || !date) {
+    console.log('Generating time slots with:', {
+      venue: !!venue,
+      date,
+      selectedPackage,
+      bookings: bookings.length,
+      user: user?.role
+    });
+
+    if (!venue || !date || !selectedPackage) {
+      console.log('Missing required data:', {
+        hasVenue: !!venue,
+        hasDate: !!date,
+        hasPackage: !!selectedPackage
+      });
       setTimeSlots([]);
       return;
     }
@@ -159,7 +203,19 @@ export default function Venue() {
     const day = getDayFromDate(date);
     const hours = venue.openingHours[day];
 
+    console.log('Venue hours for', day, ':', hours);
+
     if (!hours || hours.open === 'Closed') {
+      console.log('Venue is closed on', day);
+      setTimeSlots([]);
+      return;
+    }
+
+    const selectedPkg = venue.packages.find(pkg => pkg.id === selectedPackage);
+    console.log('Selected package:', selectedPkg);
+
+    if (!selectedPkg) {
+      console.log('Package not found:', selectedPackage);
       setTimeSlots([]);
       return;
     }
@@ -178,17 +234,14 @@ export default function Venue() {
 
         const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
         
-        // Get selected package duration
-        const selectedPkg = venue.packages.find(pkg => pkg.id === selectedPackage);
-        const duration = selectedPkg ? selectedPkg.duration : 1; // Default to 1 hour if no package selected
-
         const { available, remainingCapacity } = isTimeSlotAvailable(
           timeString,
-          duration,
+          selectedPkg.duration,
           bookings,
           venue.capacity
         );
 
+        // Add all slots, even if not available, for debugging
         slots.push({
           time: timeString,
           available,
@@ -197,35 +250,9 @@ export default function Venue() {
       }
     }
 
+    console.log('Generated slots:', slots.length, 'Available slots:', slots.filter(s => s.available).length);
     setTimeSlots(slots);
   };
-
-  // Regenerate time slots when date or package changes
-  useEffect(() => {
-    async function fetchBookings() {
-      if (!selectedDate || !venue) {
-        setTimeSlots([]); // Clear time slots if no date or venue
-        return;
-      }
-
-      try {
-        const bookingsQuery = query(
-          collection(db, 'bookings'),
-          where('venueId', '==', venue.id),
-          where('date', '==', selectedDate),
-          where('status', 'in', ['pending', 'confirmed'])
-        );
-        const bookingsSnapshot = await getDocs(bookingsQuery);
-        const bookings: ExistingBooking[] = bookingsSnapshot.docs.map(doc => doc.data() as ExistingBooking);
-        setExistingBookings(bookings);
-        generateTimeSlots(selectedDate, bookings);
-      } catch (error) {
-        console.error('Error fetching bookings:', error);
-        setTimeSlots([]); // Clear time slots on error
-      }
-    }
-    fetchBookings();
-  }, [selectedDate, selectedPackage, venue]);
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();

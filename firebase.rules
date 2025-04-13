@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdminOrSuperAdmin() {
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return userDoc != null && (userDoc.data.role == 'admin' || userDoc.data.role == 'superadmin');
+    }
+
+    function isSuperAdmin() {
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return userDoc != null && userDoc.data.role == 'superadmin';
+    }
+
+    function isVenue() {
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return userDoc != null && userDoc.data.role == 'venue';
+    }
+
+    function isVenueOwner(venueId) {
+      let venue = get(/databases/$(database)/documents/venues/$(venueId));
+      return venue != null && venue.data.creatorId == request.auth.uid;
+    }
+
+    // Users collection rules
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAuthenticated() && (
+        request.auth.uid == userId || 
+        isSuperAdmin()
+      );
+    }
+
+    // Venues collection rules
+    match /venues/{venueId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (isVenue() || isAdminOrSuperAdmin());
+      allow update: if isAuthenticated() && (
+        isVenueOwner(venueId) || 
+        isAdminOrSuperAdmin()
+      );
+      allow delete: if isAuthenticated() && isSuperAdmin();
+    }
+
+    // Bookings collection rules
+    match /bookings/{bookingId} {
+      allow read: if isAuthenticated() && (
+        // Allow users to read their own bookings
+        (resource != null && request.auth.uid == resource.data.userId) || 
+        // Allow venue owners to read bookings for their venues
+        (resource != null && isVenueOwner(resource.data.venueId)) ||
+        // Allow admins to read all bookings
+        isAdminOrSuperAdmin() ||
+        // Allow users to list bookings for availability checking
+        (
+          request.auth != null && // User must be authenticated
+          (
+            // Allow single document reads
+            request.method == 'get' ||
+            // Allow listing with specific constraints
+            (
+              request.method == 'list' &&
+              request.query.limit <= 100
+            )
+          )
+        )
+      );
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId || 
+        isVenueOwner(resource.data.venueId) ||
+        isAdminOrSuperAdmin()
+      );
+      allow delete: if isAuthenticated() && (
+        isVenueOwner(resource.data.venueId) ||
+        isAdminOrSuperAdmin()
+      );
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+} 

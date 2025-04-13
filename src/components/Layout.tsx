@@ -7,7 +7,7 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const { user, loading } = useAuth();
+  const { user, loading, isImpersonating, stopImpersonating, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -35,6 +35,36 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Impersonation Bar */}
+      {isImpersonating && (
+        <div className="bg-warning text-warning-content py-2 px-4">
+          <div className="container mx-auto flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <span className="font-medium">⚠️ Impersonating: {user?.name}</span>
+              <span className="text-sm">({user?.role})</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Link
+                to="/superadmin"
+                className="btn btn-sm btn-warning"
+                onClick={() => {
+                  stopImpersonating();
+                  navigate('/superadmin');
+                }}
+              >
+                Return to Admin Dashboard
+              </Link>
+              <button
+                onClick={() => stopImpersonating()}
+                className="btn btn-sm btn-warning"
+              >
+                Stop Impersonating
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Simplified Header */}
       <nav className="bg-surface text-text-primary border-b border-border shadow-sm sticky top-0 w-full z-50">
         <div className="container mx-auto px-4">
@@ -95,7 +125,7 @@ export default function Layout({ children }: LayoutProps) {
                   ) : (
                     // Menu for authenticated users
                     <div>
-                      {/* Navigation Section */}
+                      {/* Common Navigation Section */}
                       <div className="px-4 py-2 text-xs text-text-secondary uppercase tracking-wider bg-background">
                         Navigation
                       </div>
@@ -116,34 +146,63 @@ export default function Layout({ children }: LayoutProps) {
                         <span className="text-sm md:text-base">Explore Spaces</span>
                       </Link>
 
-                      {/* User Section */}
-                      <div className="px-4 py-2 text-xs text-text-secondary uppercase tracking-wider bg-background border-t border-border">
-                        Your Account
-                      </div>
-                      <Link
-                        to="/profile"
-                        className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background"
-                        onClick={() => setShowProfileMenu(false)}
-                      >
-                        <span className="mr-3">👤</span>
-                        <span className="text-sm md:text-base">My Profile</span>
-                      </Link>
-                      <Link
-                        to="/bookings"
-                        className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background border-t border-border"
-                        onClick={() => setShowProfileMenu(false)}
-                      >
-                        <span className="mr-3">📅</span>
-                        <span className="text-sm md:text-base">My Bookings</span>
-                      </Link>
-                      <Link
-                        to="/favorites"
-                        className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background border-t border-border"
-                        onClick={() => setShowProfileMenu(false)}
-                      >
-                        <span className="mr-3">⭐</span>
-                        <span className="text-sm md:text-base">Favorites</span>
-                      </Link>
+                      {/* Regular User Section */}
+                      {user.role === 'user' && (
+                        <>
+                          <div className="px-4 py-2 text-xs text-text-secondary uppercase tracking-wider bg-background border-t border-border">
+                            Your Account
+                          </div>
+                          <Link
+                            to="/profile"
+                            className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background"
+                            onClick={() => setShowProfileMenu(false)}
+                          >
+                            <span className="mr-3">👤</span>
+                            <span className="text-sm md:text-base">My Profile</span>
+                          </Link>
+                          <Link
+                            to="/bookings"
+                            className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background border-t border-border"
+                            onClick={() => setShowProfileMenu(false)}
+                          >
+                            <span className="mr-3">📅</span>
+                            <span className="text-sm md:text-base">My Bookings</span>
+                          </Link>
+                          <Link
+                            to="/favorites"
+                            className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background border-t border-border"
+                            onClick={() => setShowProfileMenu(false)}
+                          >
+                            <span className="mr-3">⭐</span>
+                            <span className="text-sm md:text-base">Favorites</span>
+                          </Link>
+                        </>
+                      )}
+
+                      {/* Venue Manager Section */}
+                      {user.role === 'venue' && (
+                        <>
+                          <div className="px-4 py-2 text-xs text-text-secondary uppercase tracking-wider bg-background border-t border-border">
+                            Venue Management
+                          </div>
+                          <Link
+                            to="/venue-dashboard"
+                            className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background"
+                            onClick={() => setShowProfileMenu(false)}
+                          >
+                            <span className="mr-3">📊</span>
+                            <span className="text-sm md:text-base">Booking Dashboard</span>
+                          </Link>
+                          <Link
+                            to="/my-venues"
+                            className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background border-t border-border"
+                            onClick={() => setShowProfileMenu(false)}
+                          >
+                            <span className="mr-3">🏢</span>
+                            <span className="text-sm md:text-base">My Venues</span>
+                          </Link>
+                        </>
+                      )}
 
                       {/* Admin Section */}
                       {(user.role === 'admin' || user.role === 'superadmin') && (
@@ -151,32 +210,64 @@ export default function Layout({ children }: LayoutProps) {
                           <div className="px-4 py-2 text-xs text-text-secondary uppercase tracking-wider bg-background border-t border-border">
                             Administration
                           </div>
-                          <Link
-                            to="/dashboard"
-                            className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background"
-                            onClick={() => setShowProfileMenu(false)}
-                          >
-                            <span className="mr-3">📊</span>
-                            <span className="text-sm md:text-base">Dashboard</span>
-                          </Link>
-                          {user.role === 'superadmin' && (
+                          {user.role === 'superadmin' ? (
+                            <>
+                              <Link
+                                to="/superadmin"
+                                className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background"
+                                onClick={() => setShowProfileMenu(false)}
+                              >
+                                <span className="mr-3">⚡</span>
+                                <span className="text-sm md:text-base">Admin Dashboard</span>
+                              </Link>
+                              <Link
+                                to="/superadmin/analytics"
+                                className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background border-t border-border"
+                                onClick={() => setShowProfileMenu(false)}
+                              >
+                                <span className="mr-3">📈</span>
+                                <span className="text-sm md:text-base">Analytics</span>
+                              </Link>
+                              <Link
+                                to="/superadmin/settings"
+                                className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background border-t border-border"
+                                onClick={() => setShowProfileMenu(false)}
+                              >
+                                <span className="mr-3">🛠️</span>
+                                <span className="text-sm md:text-base">System Settings</span>
+                              </Link>
+                            </>
+                          ) : (
                             <Link
-                              to="/superadmin"
-                              className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background border-t border-border"
+                              to="/dashboard"
+                              className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background"
                               onClick={() => setShowProfileMenu(false)}
                             >
-                              <span className="mr-3">⚡</span>
-                              <span className="text-sm md:text-base">Super Admin</span>
+                              <span className="mr-3">📊</span>
+                              <span className="text-sm md:text-base">Admin Dashboard</span>
                             </Link>
                           )}
                         </>
                       )}
 
+                      {/* Profile & Settings Section - Common for all users */}
+                      <div className="px-4 py-2 text-xs text-text-secondary uppercase tracking-wider bg-background border-t border-border">
+                        Settings
+                      </div>
+                      <Link
+                        to="/profile/settings"
+                        className="flex items-center w-full px-4 py-3 text-text-primary hover:bg-background"
+                        onClick={() => setShowProfileMenu(false)}
+                      >
+                        <span className="mr-3">⚙️</span>
+                        <span className="text-sm md:text-base">Account Settings</span>
+                      </Link>
+
                       {/* Sign Out Section */}
                       <div className="border-t border-border mt-2">
                         <button
                           onClick={() => {
-                            // Add sign out handler
+                            signOut();
                             setShowProfileMenu(false);
                           }}
                           className="flex items-center w-full px-4 py-3 text-accent hover:bg-background"

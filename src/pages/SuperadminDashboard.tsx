@@ -4,8 +4,10 @@ import { db } from '../services/firebase';
 import { User, Venue } from '../types';
 import { Link } from 'react-router-dom';
 import BookingsManagement from './SuperAdminDashboard/BookingsManagement';
+import { useAuth } from '../context/AuthContext';
 
 export default function SuperadminDashboard() {
+  const { impersonateUser, isImpersonating, stopImpersonating } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
   const [activeTab, setActiveTab] = useState<'users' | 'venues' | 'bookings' | 'analytics'>('users');
@@ -29,8 +31,8 @@ export default function SuperadminDashboard() {
         ]);
 
         const usersData = usersSnapshot.docs.map(doc => ({
+          id: doc.id,
           ...doc.data(),
-          uid: doc.id,
         })) as User[];
 
         const venuesData = venuesSnapshot.docs.map(doc => ({
@@ -56,27 +58,17 @@ export default function SuperadminDashboard() {
     fetchData();
   }, []);
 
-  const handleUpdateUserRole = async (uid: string, newRole: 'admin' | 'user') => {
+  const handleUpdateUserRole = async (uid: string, newRole: 'admin' | 'user' | 'venue') => {
     try {
       await updateDoc(doc(db, 'users', uid), { role: newRole });
       setUsers(users.map(user => 
-        user.uid === uid ? { ...user, role: newRole } : user
+        user.id === uid ? { ...user, role: newRole } : user
       ));
     } catch (error) {
       console.error('Error updating user role:', error);
     }
   };
 
-  const editUserRole = async (uid: string, newRole: 'admin' | 'user') => {
-    try {
-      await updateDoc(doc(db, 'users', uid), { role: newRole });
-      setUsers(users.map(user =>
-        user.uid === uid ? { ...user, role: newRole } : user
-      ));
-    } catch (error) {
-      console.error('Error updating user role:', error);
-    }
-  };
   const handleDeleteVenue = async (venueId: string) => {
     if (window.confirm('Are you sure you want to delete this venue? This action cannot be undone.')) {
       try {
@@ -112,6 +104,12 @@ export default function SuperadminDashboard() {
     }
   };
 
+  const getRoleOptions = (currentRole: string) => {
+    if (currentRole === 'superadmin') return [];
+    
+    return ['user', 'admin', 'venue'].filter(role => role !== currentRole);
+  };
+
   const filteredUsers = users.filter(user =>
     (user.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
     (user.email?.toLowerCase() || '').includes(searchTerm.toLowerCase())
@@ -121,6 +119,15 @@ export default function SuperadminDashboard() {
     (venue.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
     (venue.location?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
+
+  const handleImpersonateUser = async (userId: string) => {
+    try {
+      await impersonateUser(userId);
+    } catch (error) {
+      console.error('Error impersonating user:', error);
+      // You might want to add a toast notification here
+    }
+  };
 
   if (loading) {
     return (
@@ -132,6 +139,18 @@ export default function SuperadminDashboard() {
 
   return (
     <div className="space-y-8">
+      {isImpersonating && (
+        <div className="bg-warning text-warning-content p-4 rounded-lg flex justify-between items-center">
+          <span>You are currently impersonating another user</span>
+          <button
+            onClick={stopImpersonating}
+            className="btn btn-sm btn-warning"
+          >
+            Stop Impersonating
+          </button>
+        </div>
+      )}
+
       <div className="flex justify-between items-center">
         <h1 className="page-header">Admin Dashboard</h1>
         <Link to="/" className="btn btn-secondary">
@@ -215,13 +234,13 @@ export default function SuperadminDashboard() {
               </thead>
               <tbody>
                 {filteredUsers.map((user) => (
-                  <tr key={user.uid} className="hover:bg-background">
+                  <tr key={user.id} className="hover:bg-background">
                     <td className="flex items-center space-x-3">
                       {user.name ? (
                         <>
                           <img
                             className="h-10 w-10 rounded-full"
-                            src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}`}
+                            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}`}
                             alt=""
                           />
                           <div>
@@ -234,23 +253,38 @@ export default function SuperadminDashboard() {
                     </td>
                     <td className="text-text-secondary">{user.email}</td>
                     <td>
-                      <span className={`badge ${
-                        user.role === 'superadmin' 
-                          ? 'badge-error' 
-                          : user.role === 'admin' 
-                            ? 'badge-warning' 
-                            : 'badge-success'
-                      }`}>
-                        {user.role}
-                      </span>
+                      <div className="flex space-x-2">
+                        {user.role !== 'superadmin' && (
+                          <>
+                            <select
+                              className="select select-bordered select-sm"
+                              onChange={(e) => handleUpdateUserRole(user.id, e.target.value as 'admin' | 'user' | 'venue')}
+                              value={user.role}
+                            >
+                              <option value={user.role}>{user.role}</option>
+                              {getRoleOptions(user.role).map(role => (
+                                <option key={role} value={role}>
+                                  {role}
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              onClick={() => handleImpersonateUser(user.id)}
+                              className="btn btn-sm btn-primary"
+                            >
+                              Impersonate
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                     <td>
                       {user.role !== 'superadmin' && (
-                          <button
-                            onClick={() => editUserRole(user.uid, user.role === 'admin' ? 'user' : 'admin')}
-                            className="btn btn-secondary"
-                          >
-                          Make {user.role === 'admin' ? 'User' : 'Admin'}
+                        <button
+                          onClick={() => handleUpdateUserRole(user.id, 'user')}
+                          className="btn btn-secondary"
+                        >
+                          Remove Role
                         </button>
                       )}
                     </td>

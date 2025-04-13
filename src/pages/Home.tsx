@@ -13,7 +13,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
-  const { user } = useAuth();
 
   useEffect(() => {
     async function fetchVenues() {
@@ -36,14 +35,18 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const filtered = venues.filter(venue => {
-      const matchesSearch = venue.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        venue.location.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      if (selectedFilter === 'all') return matchesSearch;
-      return matchesSearch && venue.type === selectedFilter;
-    });
-    setFilteredVenues(filtered);
+    let filtered = [...venues]; 
+
+    if (searchQuery) {
+      filtered = filtered.filter(venue =>
+        venue.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        venue.location.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    if (selectedFilter !== 'all') {
+      filtered = filtered.filter(venue => venue.type === selectedFilter);
+    }
+    setFilteredVenues(filtered); 
   }, [searchQuery, selectedFilter, venues]);
 
   if (loading) {

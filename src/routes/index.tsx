@@ -47,6 +47,10 @@ export const router = createBrowserRouter([
     element: <Layout><Login /></Layout>,
   },
   {
+    path: '/signup',
+    element: <Layout><Login /></Layout>,
+  },
+  {
     path: '/dashboard',
     element: (
       <ProtectedRoute requireAdmin>

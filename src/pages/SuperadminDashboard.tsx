@@ -67,6 +67,16 @@ export default function SuperadminDashboard() {
     }
   };
 
+  const editUserRole = async (uid: string, newRole: 'admin' | 'user') => {
+    try {
+      await updateDoc(doc(db, 'users', uid), { role: newRole });
+      setUsers(users.map(user =>
+        user.uid === uid ? { ...user, role: newRole } : user
+      ));
+    } catch (error) {
+      console.error('Error updating user role:', error);
+    }
+  };
   const handleDeleteVenue = async (venueId: string) => {
     if (window.confirm('Are you sure you want to delete this venue? This action cannot be undone.')) {
       try {
@@ -207,14 +217,20 @@ export default function SuperadminDashboard() {
                 {filteredUsers.map((user) => (
                   <tr key={user.uid} className="hover:bg-background">
                     <td className="flex items-center space-x-3">
-                      <img
-                        className="h-10 w-10 rounded-full"
-                        src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}`}
-                        alt=""
-                      />
-                      <div>
-                        <div className="font-medium text-text-primary">{user.name}</div>
-                      </div>
+                      {user.name ? (
+                        <>
+                          <img
+                            className="h-10 w-10 rounded-full"
+                            src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}`}
+                            alt=""
+                          />
+                          <div>
+                            <div className="font-medium text-text-primary">{user.name}</div>
+                          </div>
+                        </>
+                      ) : (
+                        <div>No Name</div>
+                      )}
                     </td>
                     <td className="text-text-secondary">{user.email}</td>
                     <td>
@@ -230,10 +246,10 @@ export default function SuperadminDashboard() {
                     </td>
                     <td>
                       {user.role !== 'superadmin' && (
-                        <button
-                          onClick={() => handleUpdateUserRole(user.uid, user.role === 'admin' ? 'user' : 'admin')}
-                          className="btn btn-secondary"
-                        >
+                          <button
+                            onClick={() => editUserRole(user.uid, user.role === 'admin' ? 'user' : 'admin')}
+                            className="btn btn-secondary"
+                          >
                           Make {user.role === 'admin' ? 'User' : 'Admin'}
                         </button>
                       )}

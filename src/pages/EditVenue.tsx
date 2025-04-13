@@ -93,12 +93,13 @@ export default function EditVenue() {
     }));
   };
 
-  const addPackage = () => {
-    setVenue(prev => ({
-      ...prev,
-      packages: [...(prev.packages || []), { ...DEFAULT_PACKAGE, id: Date.now().toString() }],
-    }));
-  };
+ const addPackage = () => {
+  const generateId = () => Math.random().toString(36).substring(2, 15);
+  setVenue(prev => ({
+   ...prev,
+   packages: [...(prev.packages || []), { ...DEFAULT_PACKAGE, id: generateId() }],
+  }));
+ };
 
   const removePackage = (index: number) => {
     setVenue(prev => ({

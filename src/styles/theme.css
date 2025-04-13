@@ -6,8 +6,6 @@
   --secondary-dark: #0044CC;
   --accent: #FF3B30;       /* Alert Red - like warning signs */
   --accent-dark: #CC2F26;
-  --info: #0055FF;        /* Information Blue - for status updates */
-  --info-dark: #0044CC;
   --success: #10B981;      /* Success Green - like exit signs */
   --success-dark: #059669;
   
@@ -283,8 +281,8 @@ input[type="time"] {
 }
 
 .badge-info {
-  background-color: #E6F0FF;
-  color: var(--info-dark);
+  background-color: #E6F0FF; /* Light blue for info badges */
+  color: var(--secondary-dark);
 }
 
 .badge-success {

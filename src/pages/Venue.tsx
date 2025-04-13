@@ -62,12 +62,12 @@ export default function Venue() {
         setExistingBookings(bookings);
         // Regenerate time slots when bookings are fetched
         generateTimeSlots(selectedDate, bookings);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching bookings:', error);
       }
     }
 
-    fetchBookings();
+    if (selectedDate) fetchBookings();
   }, [selectedDate, venue]);
 
   useEffect(() => {
@@ -97,7 +97,7 @@ export default function Venue() {
             capacity: venueData.capacity || 1, // Default to 1 if not specified
           } as VenueType);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching venue:', error);
       } finally {
         setLoading(false);
@@ -199,6 +199,33 @@ export default function Venue() {
 
     setTimeSlots(slots);
   };
+
+  // Regenerate time slots when date or package changes
+  useEffect(() => {
+    async function fetchBookings() {
+      if (!selectedDate || !venue) {
+        setTimeSlots([]); // Clear time slots if no date or venue
+        return;
+      }
+
+      try {
+        const bookingsQuery = query(
+          collection(db, 'bookings'),
+          where('venueId', '==', venue.id),
+          where('date', '==', selectedDate),
+          where('status', 'in', ['pending', 'confirmed'])
+        );
+        const bookingsSnapshot = await getDocs(bookingsQuery);
+        const bookings: ExistingBooking[] = bookingsSnapshot.docs.map(doc => doc.data() as ExistingBooking);
+        setExistingBookings(bookings);
+        generateTimeSlots(selectedDate, bookings);
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+        setTimeSlots([]); // Clear time slots on error
+      }
+    }
+    fetchBookings();
+  }, [selectedDate, selectedPackage, venue]);
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -376,10 +403,8 @@ export default function Venue() {
                   <select
                     value={selectedPackage}
                     onChange={(e) => {
-                      setSelectedPackage(e.target.value);
-                      if (selectedDate) {
-                        generateTimeSlots(selectedDate, existingBookings);
-                      }
+                      setSelectedPackage(e.target.value as string);
+                      setSelectedTime(''); // Clear selected time when package changes
                     }}
                     className="input"
                     required

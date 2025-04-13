@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "serve -s dist -l $PORT" // Added start script for Cloud Run
+    "start": "serve -s dist -l $PORT"
   },
   "dependencies": {
     "@firebase/app": "^0.11.4",

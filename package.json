@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "cross-env serve -s dist -l ${PORT:-8080}"
+    "start": "node start-server.js"
   },
   "dependencies": {
     "@firebase/app": "^0.11.4",

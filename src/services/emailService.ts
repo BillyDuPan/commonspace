@@ -107,7 +107,7 @@ class EmailService {
             <h3>Booking Details</h3>
             <p><strong>Venue:</strong> ${venue.name}</p>
             <p><strong>Package:</strong> ${packageInfo.name}</p>
-            <p><strong>Date:</strong> ${new Date(booking.date).toLocaleDateString()}</p>
+            <p><strong>Date:</strong> ${new Date(booking.date.seconds * 1000).toLocaleDateString()}</p>
             <p><strong>Time:</strong> ${booking.time}</p>
             <p><strong>Duration:</strong> ${booking.duration} hours</p>
             <p><strong>Status:</strong> ${booking.status}</p>
@@ -152,7 +152,7 @@ class EmailService {
           <div style="margin: 20px 0; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
             <h3>Booking Details</h3>
             <p><strong>Venue:</strong> ${venue.name}</p>
-            <p><strong>Date:</strong> ${new Date(booking.date).toLocaleDateString()}</p>
+            <p><strong>Date:</strong> ${new Date(booking.date.seconds * 1000).toLocaleDateString()}</p>
             <p><strong>Time:</strong> ${booking.time}</p>
           </div>
           <p>If you have any questions, please contact us.</p>
@@ -172,7 +172,7 @@ class EmailService {
           <div style="margin: 20px 0; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
             <h3>Booking Details</h3>
             <p><strong>Venue:</strong> ${venue.name}</p>
-            <p><strong>Date:</strong> ${new Date(booking.date).toLocaleDateString()}</p>
+            <p><strong>Date:</strong> ${new Date(booking.date.seconds * 1000).toLocaleDateString()}</p>
             <p><strong>Time:</strong> ${booking.time}</p>
             <p><strong>Address:</strong> ${venue.address}</p>
           </div>
@@ -237,7 +237,7 @@ class EmailService {
           <div style="margin-bottom: 15px; padding: 10px; border: 1px solid #eee; border-radius: 5px;">
             <p style="margin: 0;"><strong>${booking.venueName}</strong></p>
             <p style="margin: 5px 0;">Package: ${booking.packageName}</p>
-            <p style="margin: 5px 0;">Date: ${new Date(booking.date).toLocaleDateString()}</p>
+            <p style="margin: 5px 0;">Date: ${new Date(booking.date.seconds * 1000).toLocaleDateString()}</p>
             <p style="margin: 5px 0;">Time: ${booking.time}</p>
             <p style="margin: 5px 0;">Duration: ${booking.duration} hours</p>
             <p style="margin: 5px 0;">Status: ${booking.status}</p>

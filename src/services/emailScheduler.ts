@@ -95,7 +95,7 @@ class EmailScheduler {
     futureDate.setDate(futureDate.getDate() + days);
     
     return bookings.filter(booking => {
-      const bookingDate = new Date(booking.date);
+      const bookingDate = new Date(booking.date.seconds * 1000);
       return bookingDate >= now && bookingDate <= futureDate;
     });
   }

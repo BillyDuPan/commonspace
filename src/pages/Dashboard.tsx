@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { db } from '../services/firebase';
 import { Venue, Booking } from '../types';
 import { Link } from 'react-router-dom';
+import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -55,7 +56,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="text-2xl font-bold text-primary">Loading...</div>
+        <div className="text-primary">Loading...</div>
       </div>
     );
   }
@@ -64,9 +65,14 @@ export default function Dashboard() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <h1 className="page-header">Venue Dashboard</h1>
-        <Link to="/superadmin/venue/new" className="btn btn-primary">
-          Add New Venue
-        </Link>
+        <div className="flex items-center space-x-2">
+          <Link to="/superadmin/venue/new" className="btn btn-primary">
+            Add New Venue
+          </Link>
+          <Cog6ToothIcon className="h-6 w-6 text-secondary" aria-hidden="true" />
+        </div>
+
+
       </div>
 
       {/* Stats Overview */}
@@ -132,12 +138,12 @@ export default function Dashboard() {
                       >
                         View
                       </Link>
-                      <Link
-                        to={`/superadmin/venue/${venue.id}/edit`}
-                        className="text-primary hover:text-primary-dark"
-                      >
-                        Edit
-                      </Link>
+                      <div className="flex items-center space-x-1">
+                        <Link to={`/superadmin/venue/${venue.id}/edit`} className="text-primary hover:text-primary-dark">
+                          Edit
+                        </Link>
+                        <Cog6ToothIcon className="h-4 w-4 text-secondary" aria-hidden="true" />
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -161,7 +167,7 @@ export default function Dashboard() {
                 <div>
                   <div className="font-medium text-text-primary">{venue?.name}</div>
                   <div className="text-sm text-text-secondary">
-                    {new Date(booking.date).toLocaleDateString()} • {booking.time}
+                    {new Date(booking.date.seconds * 1000).toLocaleDateString()} • {booking.time}
                   </div>
                 </div>
                 <span className={`badge ${

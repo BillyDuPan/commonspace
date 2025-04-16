@@ -62,7 +62,7 @@ export default function Home() {
       <div className="bg-surface border-b border-border">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center space-y-6 md:space-y-8 py-12 md:py-20">
-            <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-text-primary">
+            <h1 className="page-header">
               Find Your Workspace
             </h1>
             <p className="text-lg md:text-xl text-text-secondary font-medium">
@@ -103,8 +103,8 @@ export default function Home() {
             onClick={() => setSelectedFilter('all')}
             className={`px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium text-base md:text-lg transition-all ${
               selectedFilter === 'all'
-                ? 'bg-primary text-white shadow-md'
-                : 'bg-surface text-text-primary border-2 border-border hover:border-primary hover:text-primary'
+                ? 'bg-primary text-white shadow-md '
+                : 'bg-surface text-text-primary hover:text-primary'
             }`}
           >
             🏢 ALL
@@ -113,8 +113,8 @@ export default function Home() {
             onClick={() => setSelectedFilter('cafe')}
             className={`px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium text-base md:text-lg transition-all ${
               selectedFilter === 'cafe'
-                ? 'bg-primary text-white shadow-md'
-                : 'bg-surface text-text-primary border-2 border-border hover:border-primary hover:text-primary'
+                ? 'bg-primary text-white shadow-md '
+                : 'bg-surface text-text-primary hover:text-primary'
             }`}
           >
             ☕️ CAFES
@@ -123,8 +123,8 @@ export default function Home() {
             onClick={() => setSelectedFilter('cowork')}
             className={`px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium text-base md:text-lg transition-all ${
               selectedFilter === 'cowork'
-                ? 'bg-primary text-white shadow-md'
-                : 'bg-surface text-text-primary border-2 border-border hover:border-primary hover:text-primary'
+                ? 'bg-primary text-white shadow-md '
+                : 'bg-surface text-text-primary hover:text-primary'
             }`}
           >
             💼 COWORKING
@@ -186,7 +186,7 @@ export default function Home() {
                         {venue.type === 'cafe' ? '☕️ CAFE' : '💼 COWORKING'}
                       </span>
                       <span className="text-primary font-medium">
-                        View Details →
+                        <span className="hover:text-primary-dark">View Details →</span>
                       </span>
                     </div>
                   </div>

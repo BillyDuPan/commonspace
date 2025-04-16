@@ -43,6 +43,20 @@ export default {
         md: 'var(--shadow-md)',
         lg: 'var(--shadow-lg)',
       },
+      // Add alert styles
+      '.alert': {
+        padding: 'var(--space-3) var(--space-4)',
+        borderRadius: 'var(--radius-md)',
+        display: 'flex',
+        alignItems: 'center',
+      },
+      '.alert-error': {
+        extend: '.alert',
+        backgroundColor: 'rgba(var(--accent), 0.2)', // Light accent background
+        color: 'var(--text-primary)',
+        borderColor: 'var(--accent)',
+        borderWidth: '2px',
+      },
     },
   },
   plugins: [],

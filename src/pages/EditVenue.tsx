@@ -192,17 +192,16 @@ export default function EditVenue() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="page-header">
             {id ? 'Edit Venue' : 'Add New Venue'}
           </h1>
           <button
-            onClick={() => isSuperAdmin ? navigate('/superadmin') : navigate('/venue/spaces')}
-            className="text-blue-600 hover:text-blue-700"
-          >
-            ← Back to Dashboard
+            onClick={() => (isSuperAdmin ? navigate('/superadmin') : navigate('/venue/spaces'))}
+            className="text-secondary hover:text-secondary-dark"          >
+            &larr; Back to Dashboard
           </button>
         </div>
-
+          
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}
           <div className="bg-white rounded-lg shadow-sm p-6">
@@ -212,7 +211,7 @@ export default function EditVenue() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Venue Name
                 </label>
-                <input
+                <input // Apply 'input' class
                   type="text"
                   name="name"
                   value={venue.name}
@@ -226,7 +225,7 @@ export default function EditVenue() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Location
                 </label>
-                <input
+                <input // Apply 'input' class
                   type="text"
                   name="location"
                   value={venue.location}
@@ -240,7 +239,7 @@ export default function EditVenue() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Description
                 </label>
-                <textarea
+                <textarea // Apply 'input' class
                   name="description"
                   value={venue.description}
                   onChange={handleInputChange}
@@ -254,7 +253,7 @@ export default function EditVenue() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Venue Type
                 </label>
-                <select
+                <select // Apply 'input' class
                   name="type"
                   value={venue.type}
                   onChange={handleInputChange}
@@ -268,7 +267,7 @@ export default function EditVenue() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Price Range
                 </label>
-                <select
+                <select // Apply 'input' class
                   name="priceRange"
                   value={venue.priceRange}
                   onChange={handleInputChange}
@@ -291,7 +290,7 @@ export default function EditVenue() {
                   <span className="w-24 text-sm font-medium text-gray-700 capitalize">
                     {day}
                   </span>
-                  <input
+                  <input // Apply 'input' class
                     type="time"
                     value={hours.open}
                     onChange={(e) => handleOpeningHoursChange(day as DayOfWeek, 'open', e.target.value)}
@@ -299,7 +298,7 @@ export default function EditVenue() {
                   />
                   <span className="text-gray-500">to</span>
                   <input
-                    type="time"
+                    type="time" // Apply 'input' class
                     value={hours.close}
                     onChange={(e) => handleOpeningHoursChange(day as DayOfWeek, 'close', e.target.value)}
                     className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -314,11 +313,11 @@ export default function EditVenue() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Packages</h2>
               <button
+                className="btn btn-secondary"
                 type="button"
                 onClick={addPackage}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Add Package
+                + Add Package
               </button>
             </div>
             {errors.packages && <p className="text-red-600 text-sm mb-4">{errors.packages}</p>}
@@ -330,7 +329,7 @@ export default function EditVenue() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Package Name
                       </label>
-                      <input
+                      <input // Apply 'input' class
                         type="text"
                         value={pkg.name}
                         onChange={(e) => handlePackageChange(index, 'name', e.target.value)}
@@ -342,7 +341,7 @@ export default function EditVenue() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Price (per hour)
                       </label>
-                      <input
+                      <input // Apply 'input' class
                         type="number"
                         value={pkg.price}
                         onChange={(e) => handlePackageChange(index, 'price', parseFloat(e.target.value))}
@@ -356,7 +355,7 @@ export default function EditVenue() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Duration (hours)
                       </label>
-                      <input
+                      <input // Apply 'input' class
                         type="number"
                         value={pkg.duration}
                         onChange={(e) => handlePackageChange(index, 'duration', parseInt(e.target.value))}
@@ -369,7 +368,7 @@ export default function EditVenue() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Description
                       </label>
-                      <input
+                      <input // Apply 'input' class
                         type="text"
                         value={pkg.description}
                         onChange={(e) => handlePackageChange(index, 'description', e.target.value)}
@@ -381,7 +380,7 @@ export default function EditVenue() {
                   {venue.packages!.length > 1 && (
                     <button
                       type="button"
-                      onClick={() => removePackage(index)}
+                      onClick={() => removePackage(index)} // Keep existing style for remove button?
                       className="mt-4 text-red-600 hover:text-red-700 text-sm"
                     >
                       Remove Package
@@ -432,9 +431,9 @@ export default function EditVenue() {
 
           <div className="flex justify-end space-x-4">
             <button
+              className="btn btn-secondary"
               type="button"
               onClick={() => isSuperAdmin ? navigate('/superadmin') : navigate('/venue/spaces')}
-              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
             >
               Cancel
             </button>
@@ -450,4 +449,4 @@ export default function EditVenue() {
       </div>
     </div>
   );
-} 
+}

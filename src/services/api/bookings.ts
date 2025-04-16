@@ -104,7 +104,7 @@ export const bookingService = {
     
     // Get all bookings for tomorrow that are confirmed
     const tomorrowBookings = bookings.filter(b => 
-      b.date === tomorrowDateString && 
+      new Date(b.date.seconds * 1000).toLocaleDateString() === tomorrowDateString && 
       b.status === 'confirmed'
     );
     

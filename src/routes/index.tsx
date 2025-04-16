@@ -6,7 +6,7 @@ import Dashboard from '../pages/Dashboard';
 import Venue from '../pages/Venue';
 import Booking from '../pages/Booking';
 import Profile from '../pages/Profile';
-import SuperadminDashboard from '../pages/SuperadminDashboard';
+import SuperadminDashboard from '../pages/SuperAdminDashboard';
 import EditVenue from '../pages/EditVenue';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import MyVenues from '../pages/MyVenues';

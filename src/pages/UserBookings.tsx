@@ -22,7 +22,7 @@ export default function UserBookings() {
       
       // Sort bookings by date and time
       userBookings.sort((a, b) => {
-        const dateCompare = new Date(b.date).getTime() - new Date(a.date).getTime();
+        const dateCompare = new Date(b.date.seconds * 1000).getTime() - new Date(a.date.seconds * 1000).getTime();
         if (dateCompare !== 0) return dateCompare;
         return b.time.localeCompare(a.time);
       });

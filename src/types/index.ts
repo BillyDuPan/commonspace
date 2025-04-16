@@ -53,11 +53,14 @@ export interface Booking {
   packageId: string;
   packageName: string;
   packagePrice: number;
-  date: string;
+  date: { // Changed to Timestamp
+    seconds: number;
+    nanoseconds: number;
+  };
   time: string;
   duration: number;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'in_progress' | 'no_show';
-  statusUpdatedAt?: {
+  statusUpdatedAt: { // Made required
     seconds: number;
     nanoseconds: number;
   };

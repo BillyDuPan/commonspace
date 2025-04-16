@@ -87,7 +87,7 @@ export default function Bookings() {
 
           {loading ? (
             <div className="text-center py-8">
-              <div className="text-text-secondary">Loading bookings...</div>
+              <div className="text-secondary">Loading bookings...</div>
             </div>
           ) : bookings.length > 0 ? (
             <div className="space-y-6">

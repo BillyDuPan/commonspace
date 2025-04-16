@@ -21,8 +21,11 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 
 // Enable offline persistence (optional, but good for user experience)
-enableMultiTabIndexedDbPersistence(db)
-  .catch((err) => {
-    if (err.code == 'failed-precondition') {
-      console.error('Multi-tab persistence failed: This app is likely already open in another tab.');
-    } else if (err.code == 'unimplemented') {console.error('Multi-tab persistence is not available in this environment.');}});
+enableMultiTabIndexedDbPersistence(db).catch((err) => {
+  if (err.code == 'failed-precondition') {
+    console.error('Multi-tab persistence failed: This app is likely already open in another tab.');
+  } else if (err.code == 'unimplemented') {
+    console.error('Multi-tab persistence is not available in this environment.');
+  }
+});
+export { app };

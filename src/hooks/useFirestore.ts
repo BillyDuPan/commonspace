@@ -4,7 +4,7 @@ import { db } from '../services/firebase';
 
 export function useFirestore<T>(
   collectionName: string,
-  constraints: QueryConstraint[] = []
+  ...constraints: QueryConstraint[]
 ) {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +57,7 @@ export function useFirestore<T>(
     return () => {
       isMounted = false;
     };
-  }, [collectionName, JSON.stringify(constraints)]);
+  }, [collectionName, ...constraints]);
 
   return { data, loading, error };
 } 

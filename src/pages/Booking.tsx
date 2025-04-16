@@ -81,7 +81,7 @@ export default function Booking() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Book {venue.name}</h1>
+        <h1 className="page-header mb-8">Book {venue.name}</h1>
 
         <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
           {/* Date Selection */}
@@ -94,7 +94,7 @@ export default function Booking() {
               min={new Date().toISOString().split('T')[0]}
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="input"
             />
           </div>
 
@@ -106,7 +106,7 @@ export default function Booking() {
             <select
               value={selectedTime}
               onChange={(e) => setSelectedTime(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="input"
             >
               <option value="">Select a time</option>
               {/* Generate time slots */}
@@ -131,8 +131,7 @@ export default function Booking() {
                 <div
                   key={pkg.id}
                   className={`border rounded-lg p-4 cursor-pointer ${
-                    selectedPackage?.id === pkg.id
-                      ? 'border-indigo-500 bg-indigo-50'
+                    selectedPackage?.id === pkg.id ? 'border-secondary bg-secondary/10'
                       : 'border-gray-200'
                   }`}
                   onClick={() => setSelectedPackage(pkg)}
@@ -154,7 +153,7 @@ export default function Booking() {
           <button
             onClick={handleBooking}
             disabled={!selectedDate || !selectedTime || !selectedPackage}
-            className="w-full bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="btn btn-primary"
           >
             Confirm Booking
           </button>

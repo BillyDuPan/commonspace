@@ -10,6 +10,10 @@ const port = process.env.PORT || 8080;
 
 app.use(express.static(path.join(__dirname, 'dist')));
 
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });

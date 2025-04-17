@@ -6,8 +6,15 @@ runConfig:
   # concurrency: 80
   # cpu: 1
   # memoryMiB: 512
+  timeoutSeconds: 240,
+  readinessProbe:
+    httpGet:
+      path: /health
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
   entrypoint: npm start
-  timeoutSeconds: 380
+
 
 # Load environment variables from .env file.
 envVariablesRef: .env
